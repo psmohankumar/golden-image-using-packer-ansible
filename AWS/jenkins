@@ -1,23 +1,11 @@
 pipeline {
     agent any
 
-    // parameters {
-    //     string(name: 'SOURCE_DIR', defaultValue: '/tmp/amibuild', description: 'Path to the local directory containing the code')
-    // }
-
     stages {
         stage('Get Code from repository') {
             steps {
                 script {
-                    // Use the parameterized source directory
-                    // def sourceDir = "${params.SOURCE_DIR}"
-                    // def destinationDir = "${env.WORKSPACE}/"
-
-                    // Copy code from the local directory to the Jenkins workspace
-                    //sh "sudo cp -r ${sourceDir} ${destinationDir}"
-                    sh 'pwd'
-                    sh 'ls -al'
-                    
+                    git url: 'https://github.com/psmohankumar/golden-image-using-packer-ansible.git', branch: 'master'
                 }
             }
 			
@@ -25,7 +13,7 @@ pipeline {
         }
         stage('Packer') {
             steps {
-                dir('amibuild'){
+                dir('AWS'){
                     withCredentials(
                         [[$class: 'AmazonWebServicesCredentialsBinding', 
                         accessKeyVariable: 'AWS_ACCESS_KEY_ID', 
@@ -33,7 +21,6 @@ pipeline {
                         credentialsId: 'aws-credentials-global']]
                     ) 
                     {
-                        //sh 'ls -al'
                         sh 'packer build aws.pkr.hcl'
                     }
                 }
