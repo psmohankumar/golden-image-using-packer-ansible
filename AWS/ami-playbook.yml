@@ -1,0 +1,55 @@
+---
+- name: Check if ansible.builtin.package works
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update all packages
+      yum:
+        name: "*"
+        state: latest
+
+    - name: Install git
+      yum:
+        name: git
+        state: present
+
+    - name: Install amazon-ssm-agent
+      ansible.builtin.package:
+        name:
+          - amazon-ssm-agent
+
+    - name: Install CloudWatch agent via shell
+      ansible.builtin.shell: |
+        yum install https://s3.amazonaws.com/amazoncloudwatch-agent/amazon_linux/amd64/latest/amazon-cloudwatch-agent.rpm -y
+
+    - name: Start CloudWatch agent via shell
+      ansible.builtin.shell: |
+        /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a start
+
+    - name: Check CloudWatch agent status via shell
+      ansible.builtin.shell: |
+        /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status
+      register: cloudwatch_status
+
+    - name: Output CloudWatch agent status
+      ansible.builtin.debug:
+        msg: "{{ cloudwatch_status.stdout }}"
+
+    - name: Download AWS Inspector installer
+      ansible.builtin.shell: |
+        curl -O https://inspector-agent.amazonaws.com/linux/latest/install
+
+    - name: Install Docker
+      yum:
+        name: docker
+        state: present
+
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+    # - name: Run AWS Inspector installer
+    #   ansible.builtin.shell: |
+    #     bash install
+

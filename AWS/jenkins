@@ -1,0 +1,46 @@
+pipeline {
+    agent any
+
+    // parameters {
+    //     string(name: 'SOURCE_DIR', defaultValue: '/tmp/amibuild', description: 'Path to the local directory containing the code')
+    // }
+
+    stages {
+        stage('Get Code from repository') {
+            steps {
+                script {
+                    // Use the parameterized source directory
+                    // def sourceDir = "${params.SOURCE_DIR}"
+                    // def destinationDir = "${env.WORKSPACE}/"
+
+                    // Copy code from the local directory to the Jenkins workspace
+                    //sh "sudo cp -r ${sourceDir} ${destinationDir}"
+                    sh 'pwd'
+                    sh 'ls -al'
+                    
+                }
+            }
+			
+			
+        }
+        stage('Packer') {
+            steps {
+                dir('amibuild'){
+                    withCredentials(
+                        [[$class: 'AmazonWebServicesCredentialsBinding', 
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID', 
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+                        credentialsId: 'aws-credentials-global']]
+                    ) 
+                    {
+                        //sh 'ls -al'
+                        sh 'packer build aws.pkr.hcl'
+                    }
+                }
+    		}
+        }
+    }
+}
+
+
+
