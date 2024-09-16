@@ -1,33 +1,42 @@
 pipeline {
     agent any
 
+    environment {
+        GOOGLE_APPLICATION_CREDENTIALS = '/var/lib/gcp/KEYfile.json'
+    }
+
     stages {
-        stage('Get Code from repository') {
+        stage('Get Code from Repository') {
             steps {
                 script {
                     git url: 'https://github.com/psmohankumar/golden-image-using-packer-ansible.git', branch: 'master'
                 }
             }
-			
-			
         }
+
+        stage('Authenticate with GCP') {
+            steps {
+                // Authenticate with the service account using the provided key file
+                sh 'gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}'
+                sh 'gcloud config set project {projectid}'
+            }
+        }
+
+        stage('Run GCP Command') {
+            steps {
+                // Run a GCP command to verify authentication and connectivity
+                sh 'gcloud compute instances list'
+            }
+        }
+
         stage('Packer') {
             steps {
-                dir('GCP'){
-                    withCredentials(
-                        [[$class: 'AmazonWebServicesCredentialsBinding', 
-                        accessKeyVariable: 'AWS_ACCESS_KEY_ID', 
-                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
-                        credentialsId: 'aws-credentials-global']]
-                    ) 
-                    {
-                        sh 'packer build aws.pkr.hcl'
-                    }
+                dir('GCP') {
+                    // Initialize and build Packer image
+                    sh 'packer init gcp.pkr.hcl'
+                    sh 'packer build -var-file=variables.pkrvars.hcl gcp.pkr.hcl'
                 }
-    		}
+            }
         }
     }
 }
-
-
-

@@ -4,23 +4,22 @@
   become: yes
   tasks:
     - name: Update all packages
-      yum:
-        name: "*"
-        state: latest
+      apt:
+        update_cache: yes
+        upgrade: dist
 
     - name: Install git
-      yum:
+      apt:
         name: git
         state: present
 
     - name: Install Docker
-      yum:
-        name: docker
+      apt:
+        name: docker.io
         state: present
 
     - name: Start and enable Docker service
-      service:
+      systemd:
         name: docker
         state: started
         enabled: yes
-
