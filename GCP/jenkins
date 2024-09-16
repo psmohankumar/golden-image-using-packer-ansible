@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Get Code from repository') {
+            steps {
+                script {
+                    git url: 'https://github.com/psmohankumar/golden-image-using-packer-ansible.git', branch: 'master'
+                }
+            }
+			
+			
+        }
+        stage('Packer') {
+            steps {
+                dir('GCP'){
+                    withCredentials(
+                        [[$class: 'AmazonWebServicesCredentialsBinding', 
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID', 
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY',
+                        credentialsId: 'aws-credentials-global']]
+                    ) 
+                    {
+                        sh 'packer build aws.pkr.hcl'
+                    }
+                }
+    		}
+        }
+    }
+}
+
+
+
