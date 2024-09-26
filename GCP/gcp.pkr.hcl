@@ -28,11 +28,12 @@ variable "builder_sa" {
 source "googlecompute" "gcp-image" {
   project_id                  = var.project_id
   machine_type                = "e2-medium"
-  source_image                = "projects/debian-cloud/global/images/debian-12-bookworm-v20240910"
+  source_image_family         = "debian-12"
   zone                        = var.zone
   image_name                  = "gcp-image-{{timestamp}}"
   image_description           = "Created with HashiCorp Packer from Jenkins"
-  ssh_username                = "root"
+  disk_size       = 10
+  ssh_username                = "debian"
   tags                        = ["packer"]
   impersonate_service_account = var.builder_sa
 }
@@ -42,7 +43,7 @@ build {
 
   provisioner "ansible" {
     playbook_file           = "ami-playbook.yml"
-    user = "root"
+    user = "debian"
     use_proxy = false
   }
 }

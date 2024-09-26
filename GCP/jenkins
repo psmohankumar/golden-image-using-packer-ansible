@@ -2,8 +2,10 @@ pipeline {
     agent any
 
     environment {
-        GOOGLE_APPLICATION_CREDENTIALS = '/var/lib/gcp/KEYfile.json'
-    }
+		CLOUDSDK_CORE_PROJECT='data-project-434819'
+		CLIENT_EMAIL='ci-cd-service-account@data-project-434819.iam.gserviceaccount.com'
+		GOOGLE_APPLICATION_CREDENTIALS=credentials('gcloud-creds')
+	}
 
     stages {
         stage('Get Code from Repository') {
@@ -17,8 +19,8 @@ pipeline {
         stage('Authenticate with GCP') {
             steps {
                 // Authenticate with the service account using the provided key file
-                sh 'gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}'
-                sh 'gcloud config set project {projectid}'
+                sh 'gcloud auth activate-service-account --key-file="$GOOGLE_APPLICATION_CREDENTIALS"'
+                sh 'gcloud config list'
             }
         }
 
