@@ -28,7 +28,7 @@ variable "builder_sa" {
 source "googlecompute" "gcp-image" {
   project_id                  = var.project_id
   machine_type                = "e2-medium"
-  source_image                = "debian-12-bookworm-v20240910"
+  source_image                = "projects/debian-cloud/global/images/debian-12-bookworm-v20240910"
   zone                        = var.zone
   image_name                  = "gcp-image-{{timestamp}}"
   image_description           = "Created with HashiCorp Packer from Jenkins"
